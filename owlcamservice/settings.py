@@ -31,9 +31,11 @@ ALLOWED_HOSTS = []
 # Application definition
 
 INSTALLED_APPS = [
+    'rules',
+    'users',
+    'camera',
     'rest_framework',
     'rest_framework_simplejwt',
-    'rules',
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
@@ -126,4 +128,4 @@ USE_TZ = True
 
 STATIC_URL = 'static/'
 
-AUTH_USER_MODEL = 'rules.User'
+AUTH_USER_MODEL = 'users.User'

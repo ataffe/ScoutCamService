@@ -1,47 +1,8 @@
-from django.http import JsonResponse, Http404
-from rest_framework.parsers import JSONParser
-from rest_framework.views import APIView
-from rest_framework.response import Response
 from rest_framework.exceptions import PermissionDenied
 
-from rules.models import User, Camera, Rule
-from rules.serializers import RuleSerializer, CameraSerializer, RegisterUserSerializer, UserSerializer
-from rest_framework import generics, status, permissions, viewsets, mixins
-from rest_framework_simplejwt.tokens import  RefreshToken
-
-
-class RegisterUserView(generics.CreateAPIView):
-    serializer_class = RegisterUserSerializer
-    permission_classes = [permissions.AllowAny]
-
-    def create(self, request, *args, **kwargs):
-        serializer = self.get_serializer(data=request.data)
-        serializer.is_valid(raise_exception=True)
-        user = serializer.save()
-
-        token = RefreshToken.for_user(user)
-
-        return JsonResponse({
-            'user': {
-                'public_user_id': str(user.public_user_id),
-                'username': user.email,
-            },
-            'access': str(token.access_token),
-            'refresh': str(token),
-        }, status=status.HTTP_201_CREATED)
-
-class UserView(generics.RetrieveDestroyAPIView):
-    serializer_class = UserSerializer
-    lookup_field = 'public_user_id'
-    permission_classes = [permissions.IsAuthenticated]
-
-    def get_queryset(self):
-        return User.objects.filter(public_user_id=self.request.user.public_user_id)
-
-class UserListView(generics.ListAPIView):
-    serializer_class = UserSerializer
-    queryset = User.objects.all()[:25]
-    permission_classes = [permissions.IsAuthenticated]
+from rules.models import Camera, Rule
+from rules.serializers import RuleSerializer
+from rest_framework import permissions, viewsets
 
 
 class RuleViewSet(viewsets.ModelViewSet):
@@ -64,17 +25,6 @@ class RuleViewSet(viewsets.ModelViewSet):
 
     def perform_create(self, serializer):
         serializer.save(camera=self.get_camera(), owner=self.request.user)
-
-class CameraViewSet(viewsets.ModelViewSet):
-    serializer_class = CameraSerializer
-    lookup_field = 'public_camera_id'
-    permission_classes = [permissions.IsAuthenticated]
-
-    def get_queryset(self):
-        return Camera.objects.filter(owner=self.request.user)
-
-    def perform_create(self, serializer):
-        serializer.save(owner=self.request.user)
 
 # class RuleDetail(APIView):
 #     """
