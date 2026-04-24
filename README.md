@@ -1,6 +1,6 @@
 # OwlCamService
 
-A microservice for managing rules for the owl cam system.
+A microservice built using django for managing rules for the owl cam system.
 
 # API URL Reference
 
