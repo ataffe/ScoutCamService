@@ -9,4 +9,4 @@ class CameraSerializer(serializers.ModelSerializer):
     class Meta:
         model = Camera
         fields = '__all__'
-        read_only_fields = ['public_camera_id', 'owner', 'location', 'created_at']
+        read_only_fields = ['public_camera_id', 'owner', 'created_at']

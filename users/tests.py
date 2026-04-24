@@ -7,7 +7,6 @@ from rest_framework_simplejwt.tokens import RefreshToken
 
 from users.models import User
 
-
 def make_user(username, email, password='StrongPass123!', first_name='Test', last_name='User'):
     return User.objects.create_user(
         username=username,
