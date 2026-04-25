@@ -12,7 +12,7 @@ class RuleViewSet(viewsets.ModelViewSet):
 
     def get_camera(self):
         camera = Camera.objects.filter(
-            public_camera_id=self.kwargs['parent_lookup_public_camera_id'],
+            public_camera_id=self.kwargs['public_camera_id_public_camera_id'],
             owner=self.request.user
         ).first()
 
