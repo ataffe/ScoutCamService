@@ -31,6 +31,7 @@ jobs:
           --health-retries 5
 
     env:
+      SECRET_KEY: ${{ secrets.DJANGO_SECRET_KEY }}
       DB_NAME: testdb
       DB_USER: root
       DB_PASSWORD: root
