@@ -1,6 +1,9 @@
 # OwlCamService
 
-A web service built using Django for managing users, cameras, and rules for the owl cam system.
+A web service built using Django for managing users, cameras, and rules for the owl notification camera system.
+This web service handles registering / logging in users, and CRUD operations for users, cameras and rules for cameras.
+All endpoints are secured using JWTs and the service is currently designed to be used with postgres version 18+ because it uses the
+UUIDv7 function.
 
 # API URL Reference
 
@@ -12,12 +15,98 @@ A web service built using Django for managing users, cameras, and rules for the 
 | POST | `/v1/auth/token/` | `users:token_obtain_pair` |
 | POST | `/v1/auth/token/refresh/` | `users:token_refresh` |
 
+### `POST /v1/auth/register/`
+
+Request:
+```json
+{
+  "first_name": "Jane",
+  "last_name": "Doe",
+  "email": "jane.doe@example.com",
+  "password": "securepassword123"
+}
+```
+
+Response `201 Created`:
+```json
+{
+  "first_name": "Jane",
+  "last_name": "Doe",
+  "email": "jane.doe@example.com",
+  "public_user_id": "019731a2-1234-7abc-8def-000000000001"
+}
+```
+
+### `POST /v1/auth/token/`
+
+Request:
+```json
+{
+  "email": "jane.doe@example.com",
+  "password": "securepassword123"
+}
+```
+
+Response `200 OK`:
+```json
+{
+  "access": "<jwt-access-token>",
+  "refresh": "<jwt-refresh-token>"
+}
+```
+
+### `POST /v1/auth/token/refresh/`
+
+Request:
+```json
+{
+  "refresh": "<jwt-refresh-token>"
+}
+```
+
+Response `200 OK`:
+```json
+{
+  "access": "<jwt-access-token>"
+}
+```
+
+---
+
 ## Users
 
 | Method | URL | Name |
 |--------|-----|------|
 | GET | `/v1/users/` | `users:user_list` |
 | GET | `/v1/user/<uuid:public_user_id>/` | `users:user_detail` |
+
+### `GET /v1/users/`
+
+Response `200 OK`:
+```json
+[
+  {
+    "first_name": "Jane",
+    "last_name": "Doe",
+    "email": "jane.doe@example.com",
+    "public_user_id": "019731a2-1234-7abc-8def-000000000001"
+  }
+]
+```
+
+### `GET /v1/user/<public_user_id>/`
+
+Response `200 OK`:
+```json
+{
+  "first_name": "Jane",
+  "last_name": "Doe",
+  "email": "jane.doe@example.com",
+  "public_user_id": "019731a2-1234-7abc-8def-000000000001"
+}
+```
+
+---
 
 ## Cameras
 
@@ -26,12 +115,199 @@ A web service built using Django for managing users, cameras, and rules for the 
 | GET, POST | `/v1/cameras/` | `camera:camera-list` |
 | GET, PUT, PATCH, DELETE | `/v1/cameras/<public_camera_id>/` | `camera:camera-detail` |
 
+### `GET /v1/cameras/`
+
+Response `200 OK`:
+```json
+[
+  {
+    "id": 1,
+    "public_camera_id": "019731a2-1234-7abc-8def-000000000002",
+    "owner": "jane.doe@example.com",
+    "location": "Front Door",
+    "created_at": "2026-04-28T12:00:00Z"
+  }
+]
+```
+
+### `POST /v1/cameras/`
+
+Request:
+```json
+{
+  "location": "Front Door"
+}
+```
+
+Response `201 Created`:
+```json
+{
+  "id": 1,
+  "public_camera_id": "019731a2-1234-7abc-8def-000000000002",
+  "owner": "jane.doe@example.com",
+  "location": "Front Door",
+  "created_at": "2026-04-28T12:00:00Z"
+}
+```
+
+### `GET /v1/cameras/<public_camera_id>/`
+
+Response `200 OK`:
+```json
+{
+  "id": 1,
+  "public_camera_id": "019731a2-1234-7abc-8def-000000000002",
+  "owner": "jane.doe@example.com",
+  "location": "Front Door",
+  "created_at": "2026-04-28T12:00:00Z"
+}
+```
+
+### `PUT /v1/cameras/<public_camera_id>/`
+
+Request:
+```json
+{
+  "location": "Back Door"
+}
+```
+
+Response `200 OK`:
+```json
+{
+  "id": 1,
+  "public_camera_id": "019731a2-1234-7abc-8def-000000000002",
+  "owner": "jane.doe@example.com",
+  "location": "Back Door",
+  "created_at": "2026-04-28T12:00:00Z"
+}
+```
+
+### `DELETE /v1/cameras/<public_camera_id>/`
+
+Response `204 No Content`
+
+---
+
 ## Rules
 
 | Method | URL | Name |
 |--------|-----|------|
 | GET, POST | `/v1/cameras/<public_camera_id>/rules/` | `rules:camera-rules-list` |
 | GET, PUT, PATCH, DELETE | `/v1/cameras/<public_camera_id>/rules/<public_rule_id>/` | `rules:camera-rules-detail` |
+
+### `GET /v1/cameras/<public_camera_id>/rules/`
+
+Response `200 OK`:
+```json
+[
+  {
+    "id": 1,
+    "public_rule_id": "019731a2-1234-7abc-8def-000000000003",
+    "owner": 1,
+    "camera": 1,
+    "rule": "Alert when motion detected after 10pm",
+    "rule_nickname": "Night Motion Alert",
+    "is_enabled": true,
+    "created_at": "2026-04-28T12:00:00Z"
+  }
+]
+```
+
+### `POST /v1/cameras/<public_camera_id>/rules/`
+
+Request:
+```json
+{
+  "rule": "Alert when motion detected after 10pm",
+  "rule_nickname": "Night Motion Alert",
+  "is_enabled": true
+}
+```
+
+Response `201 Created`:
+```json
+{
+  "id": 1,
+  "public_rule_id": "019731a2-1234-7abc-8def-000000000003",
+  "owner": 1,
+  "camera": 1,
+  "rule": "Alert when motion detected after 10pm",
+  "rule_nickname": "Night Motion Alert",
+  "is_enabled": true,
+  "created_at": "2026-04-28T12:00:00Z"
+}
+```
+
+### `GET /v1/cameras/<public_camera_id>/rules/<public_rule_id>/`
+
+Response `200 OK`:
+```json
+{
+  "id": 1,
+  "public_rule_id": "019731a2-1234-7abc-8def-000000000003",
+  "owner": 1,
+  "camera": 1,
+  "rule": "Alert when motion detected after 10pm",
+  "rule_nickname": "Night Motion Alert",
+  "is_enabled": true,
+  "created_at": "2026-04-28T12:00:00Z"
+}
+```
+
+### `PUT /v1/cameras/<public_camera_id>/rules/<public_rule_id>/`
+
+Request:
+```json
+{
+  "rule": "Alert when motion detected after 11pm",
+  "rule_nickname": "Late Night Motion Alert",
+  "is_enabled": true
+}
+```
+
+Response `200 OK`:
+```json
+{
+  "id": 1,
+  "public_rule_id": "019731a2-1234-7abc-8def-000000000003",
+  "owner": 1,
+  "camera": 1,
+  "rule": "Alert when motion detected after 11pm",
+  "rule_nickname": "Late Night Motion Alert",
+  "is_enabled": true,
+  "created_at": "2026-04-28T12:00:00Z"
+}
+```
+
+### `PATCH /v1/cameras/<public_camera_id>/rules/<public_rule_id>/`
+
+Request:
+```json
+{
+  "is_enabled": false
+}
+```
+
+Response `200 OK`:
+```json
+{
+  "id": 1,
+  "public_rule_id": "019731a2-1234-7abc-8def-000000000003",
+  "owner": 1,
+  "camera": 1,
+  "rule": "Alert when motion detected after 11pm",
+  "rule_nickname": "Late Night Motion Alert",
+  "is_enabled": false,
+  "created_at": "2026-04-28T12:00:00Z"
+}
+```
+
+### `DELETE /v1/cameras/<public_camera_id>/rules/<public_rule_id>/`
+
+Response `204 No Content`
+
+---
 
 ## Admin
 
