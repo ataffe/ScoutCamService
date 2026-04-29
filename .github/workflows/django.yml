@@ -32,11 +32,11 @@ jobs:
 
     env:
       SECRET_KEY: ${{ secrets.DJANGO_SECRET_KEY }}
-      DB_NAME: testdb
-      DB_USER: root
-      DB_PASSWORD: root
-      DB_HOST: localhost
-      DB_PORT: 5432
+      DATABASE_NAME: testdb
+      DATABASE_USERNAME: root
+      DATABASE_PASSWORD: root
+      DATABASE_HOST: localhost
+      DATABASE_PORT: 5432
 
     steps:
     - uses: actions/checkout@v4
