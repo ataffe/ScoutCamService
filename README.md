@@ -1,6 +1,6 @@
-# OwlCamService
+# ScoutCamService
 
-A web service built using Django for managing users, cameras, and rules for the owl notification camera system.
+A web service built using Django for managing users, cameras, and rules for the scout notification camera system.
 This web service handles registering / logging in users, and CRUD operations for users, cameras and rules for cameras.
 All endpoints are secured using JWTs and the service is currently designed to be used with postgres version 18+ because it uses the
 UUIDv7 function.
